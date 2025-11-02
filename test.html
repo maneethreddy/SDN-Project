@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Terminal</title>
+    <style>
+        body { background: #1e1e1e; color: #d4d4d4; font-family: monospace; padding: 20px; }
+        #output { margin: 20px 0; }
+        #input { width: 100%; background: #252526; color: #d4d4d4; border: 1px solid #444; padding: 10px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div id="output"></div>
+    <input type="text" id="input" placeholder="Type a command and press Enter">
+    <script>
+        const output = document.getElementById('output');
+        const input = document.getElementById('input');
+        
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.keyCode === 13) {
+                e.preventDefault();
+                const cmd = input.value.trim();
+                if (cmd) {
+                    output.innerHTML += '<div>Command: ' + cmd + '</div>';
+                    input.value = '';
+                }
+            }
+        });
+        
+        input.focus();
+    </script>
+</body>
+</html>
+

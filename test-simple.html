@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Test</title>
+    <style>
+        body { background: #1e1e1e; color: #fff; font-family: monospace; padding: 20px; }
+        #input { width: 100%; background: #252526; color: #fff; border: 1px solid #444; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Test if Enter works</h1>
+    <input type="text" id="input" placeholder="Type and press Enter">
+    <div id="output"></div>
+    <script>
+        const input = document.getElementById('input');
+        const output = document.getElementById('output');
+        
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const cmd = input.value.trim();
+                if (cmd) {
+                    output.innerHTML += '<div>Command: ' + cmd + '</div>';
+                    input.value = '';
+                }
+            }
+        });
+        
+        input.focus();
+    </script>
+</body>
+</html>
+

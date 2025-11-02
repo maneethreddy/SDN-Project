@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mininet Terminal - SDN QoS Project</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <div class="terminal-buttons">
+                <span class="button red"></span>
+                <span class="button yellow"></span>
+                <span class="button green"></span>
+            </div>
+            <div class="terminal-title">mininet@mininet-vm: SDN QoS Project</div>
+        </div>
+        <div class="terminal-body" id="terminal">
+            <div class="welcome-message">
+                <div>Welcome to Mininet Terminal Simulator</div>
+                <div>Type 'help' to see available commands or start typing commands...</div>
+            </div>
+            <div class="terminal-input-line" id="inputLine">
+                <span class="input-prompt" id="inputPrompt">mininet@mininet-vm:~$</span>
+                <input type="text" class="terminal-input" id="commandInput" autocomplete="off" spellcheck="false" autofocus>
+                <span class="cursor" id="inputCursor">█</span>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
+
