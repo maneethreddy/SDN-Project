@@ -20,12 +20,15 @@
             <div class="welcome-message">
                 <div>Welcome to Mininet Terminal Simulator</div>
                 <div>Type 'help' to see available commands or start typing commands...</div>
+                <div class="prompt-line">
+                    <span class="prompt">mininet@mininet-vm:~$</span>
+                    <span class="cursor">█</span>
+                </div>
             </div>
-            <div class="terminal-input-line" id="inputLine">
-                <span class="input-prompt" id="inputPrompt">mininet@mininet-vm:~$</span>
-                <input type="text" class="terminal-input" id="commandInput" autocomplete="off" spellcheck="false" autofocus>
-                <span class="cursor" id="inputCursor">█</span>
-            </div>
+        </div>
+        <div class="terminal-input-container">
+            <span class="input-prompt">mininet@mininet-vm:~$</span>
+            <input type="text" class="terminal-input" id="commandInput" autocomplete="off" spellcheck="false" autofocus>
         </div>
     </div>
     <script src="script.js"></script>

@@ -262,72 +262,22 @@ function addOutput(text, className = 'output', animate = true) {
 
 function addPrompt(command = '') {
     if (!terminal) return;
-    
-    // Remove existing input line
-    const oldInputLine = document.getElementById('inputLine');
-    if (oldInputLine && oldInputLine.parentNode) {
-        oldInputLine.remove();
-    }
-    
     const promptDiv = document.createElement('div');
     promptDiv.className = 'prompt-line';
     const promptSpan = document.createElement('span');
     promptSpan.className = isMininetMode ? 'mininet-prompt' : 'prompt';
     promptSpan.textContent = isMininetMode ? 'mininet>' : 'mininet@mininet-vm:~$';
-    
     if (command) {
-        // Just show the prompt with command (for executed commands)
         const commandSpan = document.createElement('span');
         commandSpan.className = 'command';
         commandSpan.textContent = ' ' + command;
         promptDiv.appendChild(promptSpan);
         promptDiv.appendChild(commandSpan);
-        terminal.appendChild(promptDiv);
     } else {
-        // Create new input line inline with prompt
         promptDiv.appendChild(promptSpan);
-        
-        // Create input element inline
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.className = 'terminal-input';
-        input.id = 'commandInput';
-        input.autocomplete = 'off';
-        input.spellcheck = false;
-        input.value = '';
-        
-        // Create cursor
-        const cursor = document.createElement('span');
-        cursor.className = 'cursor';
-        cursor.id = 'inputCursor';
-        cursor.textContent = '█';
-        
-        promptDiv.appendChild(input);
-        promptDiv.appendChild(cursor);
-        promptDiv.id = 'inputLine';
-        
-        terminal.appendChild(promptDiv);
-        
-        // Reattach handlers
-        commandInput = attachInputHandlers(input);
-        updateInputPrompt();
-        
-        // Focus input
-        setTimeout(() => {
-            if (commandInput) {
-                commandInput.focus();
-            }
-        }, 10);
     }
-    
+    terminal.appendChild(promptDiv);
     terminal.scrollTop = terminal.scrollHeight;
-}
-
-function updateInputPrompt() {
-    const inputPrompt = document.getElementById('inputPrompt');
-    if (inputPrompt) {
-        inputPrompt.textContent = isMininetMode ? 'mininet>' : 'mininet@mininet-vm:~$';
-    }
 }
 
 function executeCommand(command) {
@@ -349,12 +299,7 @@ function executeCommand(command) {
     setTimeout(() => {
         // Handle clear
         if (command === 'clear') {
-            // Clear all except the welcome message and input line
-            const welcomeMsg = terminal.querySelector('.welcome-message');
             terminal.innerHTML = '';
-            if (welcomeMsg) {
-                terminal.appendChild(welcomeMsg);
-            }
             setTimeout(() => {
                 addPrompt();
             }, 50);
@@ -364,7 +309,6 @@ function executeCommand(command) {
         // Handle exit
         if (command === 'exit' && isMininetMode) {
             isMininetMode = false;
-            updateInputPrompt();
             addOutput(commandOutputs['exit'], 'output', true);
             // Calculate delay based on output length for animation
             const exitOutput = commandOutputs['exit'];
@@ -435,7 +379,6 @@ function executeCommand(command) {
     if (command.includes('sudo mn') && command.includes('--topo single,3')) {
         output = commandOutputs['sudo mn --topo single,3 --mac --switch ovsk --controller=remote'];
         isMininetMode = true;
-        updateInputPrompt();
     }
 
     // Handle ryu-manager
@@ -488,11 +431,10 @@ window.executeTerminalCommand = function(cmd) {
 document.addEventListener('DOMContentLoaded', function() {
     terminal = document.getElementById('terminal');
     commandInput = document.getElementById('commandInput');
-    const inputLine = document.getElementById('inputLine');
     
     console.log('DOM loaded, terminal:', terminal, 'input:', commandInput);
     
-    if (!terminal || !commandInput || !inputLine) {
+    if (!terminal || !commandInput) {
         console.error('Terminal elements not found');
         alert('Error: Terminal elements not found! Check console.');
         return;
@@ -500,74 +442,96 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let historyIndex = -1;
     
-    // Function to attach event handlers to input
-    function attachInputHandlers(inputEl) {
-        if (!inputEl) return null;
+    // SIMPLIFIED event handler - multiple layers for compatibility
+    function handleEnterKey(e) {
+        console.log('🔵 EVENT FIRED:', e.type, e.key, e.keyCode, 'isInitializing:', isInitializing);
         
-        function handleEnterKey(e) {
-            if (e.key === 'Enter' || e.keyCode === 13) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const cmd = inputEl.value.trim();
-                
-                if (cmd) {
-                    try {
-                        executeCommand(cmd);
-                        inputEl.value = '';
-                        historyIndex = -1;
-                    } catch (error) {
-                        console.error('Error executing command:', error);
-                        alert('Error: ' + error.message);
-                    }
-                }
-                return false;
-            } 
+        if (e.key === 'Enter' || e.keyCode === 13) {
+            console.log('✅ ENTER KEY DETECTED');
+            e.preventDefault();
+            e.stopPropagation();
             
-            if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                if (commandHistory.length > 0) {
-                    if (historyIndex < commandHistory.length - 1) {
-                        historyIndex++;
-                        inputEl.value = commandHistory[commandHistory.length - 1 - historyIndex];
-                    }
-                }
-            } else if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                if (historyIndex > 0) {
-                    historyIndex--;
-                    inputEl.value = commandHistory[commandHistory.length - 1 - historyIndex];
-                } else {
+            // Temporarily allow input even during initialization for testing
+            if (isInitializing) {
+                console.log('⚠️ Still initializing, but allowing command for testing');
+                // Comment out this return to test
+                // return false;
+            }
+            
+            const cmd = commandInput.value.trim();
+            console.log('📝 Command to execute:', cmd);
+            
+            if (cmd) {
+                try {
+                    console.log('🚀 Calling executeCommand...');
+                    executeCommand(cmd);
+                    commandInput.value = '';
                     historyIndex = -1;
-                    inputEl.value = '';
+                    setTimeout(() => commandInput.focus(), 10);
+                    console.log('✅ Command executed successfully');
+                } catch (error) {
+                    console.error('❌ Error executing command:', error);
+                    alert('Error: ' + error.message);
+                }
+            } else {
+                console.log('⚠️ Empty command');
+            }
+            return false;
+        } 
+        
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (commandHistory.length > 0) {
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    commandInput.value = commandHistory[commandHistory.length - 1 - historyIndex];
                 }
             }
+        } else if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (historyIndex > 0) {
+                historyIndex--;
+                commandInput.value = commandHistory[commandHistory.length - 1 - historyIndex];
+            } else {
+                historyIndex = -1;
+                commandInput.value = '';
+            }
         }
-        
-        inputEl.addEventListener('keydown', handleEnterKey, false);
-        inputEl.onkeydown = handleEnterKey;
-        
-        return inputEl;
     }
     
-    // Attach handlers to initial input
-    commandInput = attachInputHandlers(commandInput);
+    // Attach multiple event handlers
+    console.log('🔧 Attaching event handlers to input:', commandInput);
+    commandInput.addEventListener('keydown', handleEnterKey, false);
+    commandInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' || e.keyCode === 13) {
+            console.log('🔵 KEYPRESS Enter detected');
+            e.preventDefault();
+            handleEnterKey(e);
+        }
+    }, false);
+    
+    // Fallback using onkeydown
+    commandInput.onkeydown = handleEnterKey;
+    
+    // Also test with inline onkeydown in HTML
+    commandInput.setAttribute('onkeydown', 'return window.handleKey(event)');
+    window.handleKey = handleEnterKey;
+    
+    console.log('✅ Event handlers attached. Input element:', commandInput);
     
     // Click handler for focus
-    terminal.addEventListener('click', (e) => {
-        if (commandInput && e.target !== commandInput) {
-            commandInput.focus();
-        }
+    terminal.addEventListener('click', () => {
+        commandInput.focus();
     });
     
     commandInput.setAttribute('tabindex', '0');
     
-    // Immediately enable input
+    // Immediately enable input - don't block it
     isInitializing = false;
     commandInput.disabled = false;
     commandInput.focus();
     
-    console.log('✅ Terminal initialized. Input ready.');
+    console.log('✅ Terminal initialized. Input ready immediately.');
     
     // Add welcome message and pre-run initial commands
     setTimeout(() => {
